@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Threshold of a Dream</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,800;1,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="sky"></canvas>
+  <div class="blob a"></div>
+  <div class="blob b"></div>
+  <div class="topbar">
+    <div class="progress" id="progress"></div>
+    <div class="lang" id="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="en" lang="en">EN</button>
+      <button type="button" data-lang="zh" lang="zh-Hant">繁中</button>
+    </div>
+  </div>
+
+  <!-- Text marked data-i18n is translated from the ZH list in app.js; the English stays here. -->
+  <main>
+
+    <!-- 1. Welcome -->
+    <section class="screen active" id="screen-intro">
+      <p class="eyebrow" data-i18n="introEyebrow">A follow-up interview for thesis · GWU Interaction Design</p>
+      <h1 data-i18n="title">Threshold of a <em>Dream</em></h1>
+      <p data-i18n="intro1">Hi! I’m Sonia, and this is the follow-up interview for my thesis project, <span class="thesis-name">Dream Translator × Interactive Space</span> (I haven’t decided on the final title yet!).</p>
+      <p data-i18n="intro2">I’m now moving into the design phase, and I’d love to hear your thoughts, feedback, or anything else you’d like to share about the project.</p>
+      <p data-i18n="intro3">Thanks to everyone who participated in the previous interviews, I’ve collected many wonderful dreams. Now, I’d love to explore how I can incorporate these precious dreams into my installation.</p>
+      <p data-i18n="intro4">For this interview, you’ll look at a series of sample images, some I photographed and some generated from AI to show how a scene gradually transforms into something dreamlike. As you watch the images change, you’ll pull a knob to mark the moment when the scene starts to feel like a dream to you.</p>
+      <label class="field">
+        <span><span data-i18n="describe">How do I describe you?</span><span class="req">*</span></span>
+        <input type="text" id="name" required aria-required="true" aria-describedby="name-error" placeholder="e.g. 20s, design student" data-i18n-placeholder="describePlaceholder">
+      </label>
+      <p class="error" id="name-error" role="alert"></p>
+      <div class="nav">
+        <button class="btn" id="start" data-i18n="start">Step inside</button>
+        <span class="enter-hint" data-i18n="duration">About 3 minutes</span>
+      </div>
+    </section>
+
+    <!-- 2. Trial -->
+    <section class="screen wide" id="screen-trial">
+      <div class="trial-head">
+        <p class="eyebrow" id="trial-count">The scene</p>
+        <h2 data-i18n="trialTitle">Click the button when it starts to feel like a dream</h2>
+        <p class="hint" data-i18n="trialHint">Press Play and watch the photo slowly change. There’s no right or wrong answer.</p>
+      </div>
+      <div class="trial">
+        <div class="stage-wrap">
+          <div class="stage" id="stage">
+            <img id="img-from" alt="Original photograph" data-i18n-alt="imgFromAlt">
+            <img id="img-to" alt="The same photograph with a dreamlike effect" data-i18n-alt="imgToAlt">
+            <div class="stage-overlay" id="stage-overlay">
+              <button class="btn" id="play" data-i18n="play">Play</button>
+            </div>
+          </div>
+          <div class="timeline" aria-hidden="true">
+            <div class="timeline-fill" id="timeline-fill"></div>
+            <div class="timeline-mark" id="timeline-mark"></div>
+          </div>
+          <div class="timeline-labels"><span data-i18n="original">Original</span><span data-i18n="transformed">Fully transformed</span></div>
+          <button class="btn dream-btn" id="dream-btn" disabled data-i18n="dreamBtn">✦ It feels like a dream</button>
+        </div>
+
+      </div>
+
+      <!-- shown after a mark -->
+      <div class="after" id="after-mark" hidden>
+        <p class="result"><span data-i18n="markedBefore">You marked the dream at</span> <strong id="mark-pct">0%</strong> <span data-i18n="markedAfter">of the transformation.</span></p>
+        <div class="squeeze">
+          <button class="ball" id="ball" aria-label="Squeeze and hold to make the dream stronger" data-i18n-aria-label="ballLabel"></button>
+          <p class="hint" data-i18n="squeezeHint">Want to fine-tune? <strong>Squeeze and hold</strong> the ball. The longer you squeeze, the stronger the dream. Let go when it feels right.</p>
+        </div>
+        <div class="nav">
+          <button class="btn ghost" id="retry" data-i18n="retry">Watch again</button>
+          <button class="btn" id="confirm" data-i18n="confirm">This is the moment</button>
+        </div>
+      </div>
+
+      <!-- shown if the video ends with no mark -->
+      <div class="after" id="after-none" hidden>
+        <p class="result" data-i18n="noMark">The scene finished without a mark.</p>
+        <div class="nav">
+          <button class="btn ghost" id="retry-none" data-i18n="retry">Watch again</button>
+          <button class="btn" id="never" data-i18n="never">It never felt like a dream</button>
+        </div>
+      </div>
+
+      <div class="after nav">
+        <button class="btn ghost" data-back data-i18n="back">Back</button>
+      </div>
+    </section>
+
+    <!-- 3. Reflection -->
+    <section class="screen" id="screen-reflect">
+      <p class="eyebrow" data-i18n="reflectEyebrow">At that moment…</p>
+      <h2 data-i18n="reflectTitle">How did it feel?</h2>
+      <img class="frozen" id="frozen" alt="">
+      <fieldset class="options" id="feeling">
+        <legend data-i18n="feelingLegend">At the moment you marked, did you feel like you were…</legend>
+        <label class="opt"><input type="radio" name="feeling" value="about-to-enter"><span class="mark"></span><span data-i18n="aboutToEnter">about to enter a dream</span></label>
+        <label class="opt"><input type="radio" name="feeling" value="inside"><span class="mark"></span><span data-i18n="inside">already inside a dream</span></label>
+        <label class="opt"><input type="radio" name="feeling" value="unsure"><span class="mark"></span><span data-i18n="unsure">not sure / something else</span></label>
+      </fieldset>
+      <div class="nav">
+        <button class="btn ghost" data-back data-i18n="back">Back</button>
+        <button class="btn" id="next-scene">Continue</button>
+      </div>
+    </section>
+
+    <!-- 4. Your dreams (after all transitions) -->
+    <section class="screen" id="screen-dreams">
+      <p class="eyebrow" data-i18n="dreamsEyebrow">Your dreams</p>
+      <h2 data-i18n="dreamsTitle">How’s your dream usually like?</h2>
+      <!-- values stay in English so the spreadsheet reads the same whatever language is shown -->
+      <fieldset class="options" id="dream-like">
+        <legend data-i18n="pickAll">Choose all that apply.</legend>
+        <label class="opt check"><input type="checkbox" name="dream-like" value="with clear sight"><span class="mark"></span><span data-i18n="clearSight">with clear sight</span></label>
+        <label class="opt check"><input type="checkbox" name="dream-like" value="getting motion blur"><span class="mark"></span><span data-i18n="motionBlur">getting motion blur</span></label>
+        <label class="opt check"><input type="checkbox" name="dream-like" value="dark sight"><span class="mark"></span><span data-i18n="darkSight">dark sight</span></label>
+        <label class="opt check"><input type="checkbox" name="dream-like" value="bright world"><span class="mark"></span><span data-i18n="brightWorld">bright world</span></label>
+        <label class="opt check"><input type="checkbox" name="dream-like" value="black and white tone"><span class="mark"></span><span data-i18n="blackWhite">black and white tone</span></label>
+      </fieldset>
+      <label class="field">
+        <span data-i18n="dreamMemory">Does this interview remind you of any dream you’ve had?</span>
+        <textarea id="dream-memory" rows="4"></textarea>
+      </label>
+      <div class="nav">
+        <button class="btn ghost" data-back data-i18n="back">Back</button>
+        <button class="btn" data-go="screen-feedback" data-i18n="continue">Continue</button>
+      </div>
+    </section>
+
+    <!-- 5. Feedback -->
+    <section class="screen" id="screen-feedback">
+      <p class="eyebrow" data-i18n="feedbackEyebrow">Almost done</p>
+      <h2 data-i18n="feedbackTitle">Anything else you’d like to share?</h2>
+      <p class="hint" data-i18n="feedbackHint">Thoughts, feedback, or ideas about the project or the installation.</p>
+      <textarea id="feedback" aria-label="Thoughts, feedback, or ideas" data-i18n-aria-label="feedbackLabel"></textarea>
+      <div class="nav">
+        <button class="btn ghost" data-back data-i18n="back">Back</button>
+        <button class="btn" id="submit">Send</button>
+      </div>
+      <p class="error" id="submit-error" role="alert"></p>
+    </section>
+
+    <!-- 6. Thanks -->
+    <section class="screen" id="screen-thanks">
+      <div class="center">
+        <div class="door" id="door"><div class="glow"></div><div class="leaf"></div></div>
+        <p class="eyebrow" data-i18n="sentEyebrow">Sent</p>
+        <h1 data-i18n="thanks">Thank you</h1>
+        <p data-i18n="thanksBody">Your answers help me decide where reality ends and the dream begins in the installation. I really appreciate your time.</p>
+        <p>— Sonia</p>
+      </div>
+    </section>
+
+    <!-- Results (open with ?results) -->
+    <section class="screen wide" id="screen-results">
+      <p class="eyebrow">Saved on this device</p>
+      <h2>Responses</h2>
+      <div class="nav">
+        <button class="btn ghost" id="export-csv">Export CSV</button>
+        <button class="btn ghost" id="export-json">Export JSON</button>
+        <button class="btn ghost danger" id="clear-results">Clear all</button>
+      </div>
+      <div class="table-wrap"><table id="results-table"></table></div>
+    </section>
+
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
